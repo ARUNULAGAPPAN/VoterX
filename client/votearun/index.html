@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StyloVote - Modern Voting App</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+      :root {
+        --primary-violet: #8A2BE2; /* BlueViolet */
+        --primary-violet-dark: #7B1FA2;
+        --glow-violet: #DA70D6; /* Orchid, for glows */
+        --light-text: #f0f0f0;
+        --dark-bg: #1a1a2e; /* Deep dark blue/purple */
+        --card-bg: rgba(46, 46, 66, 0.7); /* Semi-transparent for glassmorphism */
+        --input-bg: rgba(60, 60, 80, 0.8);
+        --border-color: rgba(138, 43, 226, 0.3); /* Semi-transparent violet */
+        --success-color: #2ecc71;
+        --error-color: #e74c3c;
+        --result-bar-start: #9b59b6; /* Amethyst */
+        --result-bar-end: #DA70D6; /* Orchid */
+      }
+
+      /* Basic Reset & Body Styles */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, var(--dark-bg) 0%, #2c2c54 100%);
+        color: var(--light-text);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      #root {
+        flex-grow: 1;
+        padding: 20px; /* Global padding for the content area */
+        display: flex;
+        /* align-items: center; /* Let specific pages/containers handle vertical alignment */
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* Glassmorphic Container */
+      .container {
+        width: 100%;
+        max-width: 550px; /* Default for login/register/thank you */
+        margin: auto; /* Center the container within #root's flex context */
+        padding: 30px 35px;
+        background: var(--card-bg);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px 0 rgba(138, 43, 226, 0.27);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        overflow: hidden; /* Important for elements like tables inside */
+      }
+
+      /* Wider containers for dashboard and results */
+      .container.dashboard, .container.results-page {
+        max-width: 950px; /* Increased width */
+        padding: 35px 45px; /* Slightly more padding */
+      }
+
+      /* Spacing for sections within the dashboard */
+      .container.dashboard section {
+        margin-bottom: 45px; /* Increased space below each section */
+      }
+      .container.dashboard section:last-child {
+        margin-bottom: 15px; /* Less margin for the very last section */
+      }
+
+
+      h1, h2, h3 {
+        color: var(--light-text);
+        text-align: center;
+        margin-bottom: 25px; /* Default bottom margin for headings */
+        font-weight: 600;
+      }
+      h2 { /* Page titles like "Admin Dashboard", "Login" */
+        font-size: 2.2em; /* Slightly larger */
+        margin-top: 0;
+        margin-bottom: 35px; /* More space below main page titles */
+        text-shadow: 0 0 8px var(--glow-violet);
+      }
+      h3 { /* Section titles like "Add New Candidate", "Voter List" */
+        font-size: 1.6em; /* Slightly larger */
+        color: var(--glow-violet);
+        margin-top: 10px; /* Space above section titles */
+        margin-bottom: 25px; /* Space below section titles */
+      }
+
+      /* Form styling */
+      form {
+        margin-bottom: 20px; /* Space after a form block */
+      }
+      form div { /* Each field container in a form */
+        margin-bottom: 22px; /* Increased space between form fields */
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--light-text);
+        opacity: 0.9;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+        width: 100%;
+        padding: 14px 18px;
+        background: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: var(--light-text);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      input[type="text"]::placeholder,
+      input[type="password"]::placeholder,
+      input[type="email"]::placeholder {
+        color: rgba(240, 240, 240, 0.6);
+      }
+      input[type="text"]:focus,
+      input[type="password"]:focus,
+      input[type="email"]:focus {
+        border-color: var(--glow-violet);
+        box-shadow: 0 0 15px var(--glow-violet), 0 0 5px var(--primary-violet) inset;
+        outline: none;
+      }
+
+      /* Glowing Button */
+      button {
+        background: linear-gradient(45deg, var(--primary-violet), var(--glow-violet));
+        color: white;
+        padding: 14px 22px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-right: 10px; /* Default right margin */
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 0 5px var(--glow-violet), 0 0 10px var(--glow-violet) inset;
+      }
+      button:last-of-type { /* Remove margin from last button in a group if needed by context */
+         /* margin-right: 0; */
+      }
+      button:hover {
+        box-shadow: 0 0 15px var(--glow-violet), 0 0 25px var(--glow-violet), 0 0 5px var(--glow-violet) inset;
+        transform: translateY(-2px);
+      }
+      button:active {
+        transform: translateY(0px);
+        box-shadow: 0 0 3px var(--glow-violet), 0 0 5px var(--glow-violet) inset;
+      }
+      button:disabled {
+        background: #555;
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .error-message, .success-message {
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 0.95em;
+        margin-top: 15px;
+        margin-bottom: 25px; /* Increased space below messages */
+        text-align: center;
+        border-width: 1px;
+        border-style: solid;
+      }
+      .error-message {
+        color: #fff;
+        background-color: rgba(231, 76, 60, 0.5);
+        border-color: var(--error-color);
+        box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+      }
+      .success-message {
+        color: #fff;
+        background-color: rgba(46, 204, 113, 0.4);
+        border-color: var(--success-color);
+        box-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+      }
+
+      .logout-button {
+        background: linear-gradient(45deg, #c0392b, #e74c3c);
+      }
+      .logout-button:hover {
+        box-shadow: 0 0 15px #e74c3c, 0 0 25px #e74c3c, 0 0 5px #e74c3c inset;
+      }
+
+      /* Table Styling */
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 20px; /* Space above table, adjusted as h3 has margin-bottom */
+        background: var(--input-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+      th, td {
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 20px; /* Increased padding in cells */
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        background-color: rgba(138, 43, 226, 0.2);
+        font-weight: 600;
+        color: var(--glow-violet);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      /* Candidate/User Item Cards (for VotingPage) */
+      .candidate-item {
+        border: 1px solid var(--border-color);
+        padding: 20px;
+        margin-bottom: 20px; /* Increased space */
+        background: var(--card-bg);
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        display: flex; /* For aligning content and button */
+        justify-content: space-between;
+        align-items: center;
+      }
+      .candidate-item div:first-child { /* Text content */
+        flex-grow: 1;
+      }
+      .candidate-item h4 {
+        margin: 0 0 10px 0;
+        color: var(--glow-violet);
+        font-size: 1.3em; /* Slightly larger */
+      }
+      .candidate-item p {
+        margin: 5px 0;
+        font-size: 1em;
+        opacity: 0.9;
+      }
+      .candidate-item button {
+        padding: 12px 18px; /* Slightly smaller for item cards */
+        font-size: 15px;
+        margin-left: 15px; /* Space between text and button */
+        margin-right: 0; /* Override default */
+      }
+
+
+      /* Attractive Result Percentage Bar */
+      .result-bar-container {
+        margin-bottom: 20px; /* Increased space */
+      }
+      .result-bar-container strong {
+        display: block;
+        margin-bottom: 10px; /* Increased space */
+        font-weight: 500;
+        font-size: 1.1em;
+      }
+      .result-bar-track {
+        height: 30px; /* Slightly taller */
+        background-color: var(--input-bg);
+        border-radius: 15px;
+        padding: 4px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+      }
+      .result-bar {
+        height: 22px;
+        background: linear-gradient(90deg, var(--result-bar-start) 0%, var(--result-bar-end) 100%);
+        color: white;
+        text-align: right;
+        padding-right: 12px; /* More padding */
+        line-height: 22px;
+        border-radius: 11px;
+        font-size: 0.95em; /* Slightly larger */
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        transition: width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+        box-shadow: 0 2px 5px rgba(155, 89, 182, 0.4);
+        position: relative;
+      }
+
+      a {
+        color: var(--glow-violet);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+      }
+      a:hover {
+        color: #fff;
+        text-shadow: 0 0 8px var(--glow-violet);
+        text-decoration: underline;
+      }
+
+      /* Action Button Layouts */
+      .form-actions { /* For buttons at the end of a form */
+          margin-top: 30px; /* Increased space */
+          display: flex;
+          justify-content: center;
+          gap: 15px;
+      }
+      .page-actions { /* For general page actions like "Go back" */
+        margin-top: 30px;
+        display: flex;
+        justify-content: flex-start;
+        gap: 15px;
+      }
+      .admin-top-actions { /* Specific for AdminDashboard top buttons */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px; /* Increased space */
+      }
+      .admin-top-actions .logout-button {
+        margin-right: 0; /* Remove default if it's the last child */
+      }
+
+      /* Table Action Buttons (Edit/Delete) */
+      table td .action-buttons {
+        display: flex;
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 10px; /* Space between stacked buttons */
+        align-items: flex-start; /* Align buttons to the start of the cell */
+      }
+      table td .action-buttons button {
+        margin-right: 0;
+        padding: 10px 15px; /* Adjusted padding */
+        font-size: 14px;
+        width: 100%; /* Make buttons take full width of their container in the cell */
+        max-width: 120px; /* Optional: prevent them from getting too wide */
+      }
+
+      /* Login page specific note about admin/voter credentials */
+      .login-page-notes {
+        margin-top: 25px;
+      }
+      .login-page-notes p {
+        text-align: center;
+        font-size: 0.9em;
+        color: rgba(240, 240, 240, 0.7);
+        margin-top: 10px; /* Space between hint paragraphs */
+      }
+      .login-page-notes p:first-of-type {
+        font-size: 1em; /* "Don't have an account?" */
+      }
+
+    </style>
+</head>
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script> <!-- Vite's entry point -->
+</body>
+</html>
